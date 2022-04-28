@@ -19,7 +19,7 @@ namespace Medici
         private float initialScaleX;
         private Image picture;
         private CardData currentCard;
-        private bool enabled = true;
+        private bool buttonEnabled = true;
         private void Awake()
         {
             picture = GetComponent<Image>();
@@ -44,7 +44,7 @@ namespace Medici
 
         public void Enable(bool on)
         {
-            enabled = on;
+            buttonEnabled = on;
             if (on)
             {
                 picture.color = Color.white;
@@ -57,21 +57,21 @@ namespace Medici
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (!enabled)
+            if (!buttonEnabled)
                 return;
             gm.PlayCard(currentCard);
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (!enabled)
+            if (!buttonEnabled)
                 return;
             transform.DOScaleX(initialScaleX*amplitude, time);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (!enabled)
+            if (!buttonEnabled)
                 return;
             transform.DOScaleX(initialScaleX, time);
         }

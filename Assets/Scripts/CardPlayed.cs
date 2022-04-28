@@ -1,11 +1,13 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Medici
 {
     public class CardPlayed : MonoBehaviour, ICardPresenter
     {
-        [SerializeField] private Text name, mainText, yesText, noText, yesHint, noHint;
+        [FormerlySerializedAs("name")] [SerializeField] private Text cardName;
+        [SerializeField] private Text mainText, yesText, noText, yesHint, noHint;
 
         private void Awake()
         {
@@ -15,7 +17,7 @@ namespace Medici
         public void Display(CardData card)
         {
             gameObject.SetActive(true);
-            name.text = card.eventName;
+            cardName.text = card.eventName;
             mainText.text = card.textEvent;
             yesText.text = card.yesTextPrize;
             yesHint.text = card.yesPrize;

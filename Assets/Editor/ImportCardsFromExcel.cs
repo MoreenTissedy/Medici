@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Medici;
 using UnityEditor;
 using UnityEngine;
@@ -11,10 +12,14 @@ namespace Editor
     public class ImportCardsFromExcel
     {
         private static string CSVpath = "/medici_GameData.csv";
+        private static string assetFolder = "Cards";
         [MenuItem("Utilities/Import cards")]
         public static void Import()
         {
-            AssetDatabase.CreateFolder("Assets", "Cards");
+            if (!AssetDatabase.GetSubFolders("Assets").Contains($"Assets/{assetFolder}"))
+            {
+                AssetDatabase.CreateFolder("Assets", assetFolder);
+            }
 
             string[] alllines = File.ReadAllLines(Application.dataPath + CSVpath);
             List<CardData> cards = new List<CardData>(alllines.Length);
@@ -23,9 +28,21 @@ namespace Editor
             {
                 var line = alllines[index];
                 string[] data = line.Split(';');
-                CardData card = ScriptableObject.CreateInstance<CardData>();
+                bool newSO = true;
                 //starting data index
                 int i = 1;
+                //if SO exists in folder - take it
+                CardData card = AssetDatabase.LoadAssetAtPath<CardData>($"Assets/{assetFolder}/{data[i]}.asset");
+                if (card is null)
+                {
+                    card = ScriptableObject.CreateInstance<CardData>();
+                    newSO = true;
+                }
+                else
+                {
+                    newSO = false;
+                    Debug.Log($"found existing {data[i]}, will overwrite");
+                }
                 //0, 1 ID	type
                 card.id = data[i];
                 //2, 3 Event_name	Text_Event
@@ -60,8 +77,11 @@ namespace Editor
                 //parsing test
                 card.ParseStatValue(card.yesPrize);
                 card.ParseStatValue(card.noPrize);
-                
-                AssetDatabase.CreateAsset(card, $"Assets/Cards/{card.id}.asset");
+
+                if (newSO)
+                {
+                    AssetDatabase.CreateAsset(card, $"Assets/{assetFolder}/{card.id}.asset");
+                }
                 cards.Add(card);
             }
             
