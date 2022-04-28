@@ -158,22 +158,22 @@ namespace Medici
                 switch (pairData[0])
                 {
                     case "gold":
-                        if (!TryApply(pairData, value => Economics.Gold+=value)) return false;
+                        if (!TryApply(pairData, value => Economics.Gold += value)) return false;
                         break;
-                    case "r": 
+                    case "r":
                     case "rep":
-                        if (!TryApply(pairData, value => Economics.Rep+=value)) return false;
+                        if (!TryApply(pairData, value => Economics.Rep += value)) return false;
                         break;
                     case "town":
-                        if (!TryApply(pairData, value => Economics.Town+=value)) return false;
+                        if (!TryApply(pairData, value => Economics.Town += value)) return false;
                         break;
                     case "assasin":
                     case "sin":
                     case "assassin":
-                        if (!TryApply(pairData, value => Economics.Assassin+=value)) return false;
+                        if (!TryApply(pairData, value => Economics.Assassin += value)) return false;
                         break;
                     case "piety":
-                        if (!TryApply(pairData, value => Economics.Piety+=value)) return false;
+                        if (!TryApply(pairData, value => Economics.Piety += value)) return false;
                         break;
                     case "fp":
                     case "Florence_Power":
@@ -183,9 +183,11 @@ namespace Medici
                     case "mod":
                         if (!Int32.TryParse(pairData[2], out int percent))
                         {
-                            Debug.LogError($"Parse error: card {id}, stat {pairData[0]}:{pairData[1]}, value was not parsed");
+                            Debug.LogError(
+                                $"Parse error: card {id}, stat {pairData[0]}:{pairData[1]}, value was not parsed");
                             return false;
                         }
+
                         if (Enum.TryParse(pairData[1], true, out Stat stat))
                         {
                             Economics.ChangeModifier(stat, percent);
@@ -199,6 +201,22 @@ namespace Medici
                             Debug.LogError($"Parse error: card {id}, {pairData[1]} not recognized");
                             return false;
                         }
+
+                        break;
+                    //prices
+                    case "price":
+                        if (!Enum.TryParse(pairData[1], true, out Goods type))
+                        {
+                            Debug.LogError($"Parse error: card {id}, type of goods {pairData[1]} not recognized.");
+                            return false;
+                        }
+                        if (!Int32.TryParse(pairData[2], out int pricePercent))
+                        {
+                            Debug.LogError(
+                                $"Parse error: card {id}, price {pairData[1]}, value was not parsed");
+                            return false;
+                        }
+                        Economics.ChangePrice(type, pricePercent);
                         break;
                     //formulas
                     case "trade":
