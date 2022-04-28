@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab54f925f7da41f48496e4a5a8d23349, type: 3}
+  m_Name: t4
+  m_EditorClassIdentifier: 
+  id: t4
+  type: 
+  eventName: "\u0413\u043E\u0440\u043E\u0434\u0441\u043A\u0430\u044F \u0420\u0430\u0442\u0443\u0448\u0430"
+  textEvent: "\u0413\u043E\u0440\u043E\u0434\u0441\u043A\u0438\u0435 \u0432\u043B\u0430\u0441\u0442\u0438
+    \u0432\u0432\u0435\u043B\u0438 \u043D\u043E\u0432\u044B\u0439 \u0441\u0431\u043E\u0440
+    \u0434\u043B\u044F \u0431\u0430\u043D\u043A\u043E\u0432 \u0438 \u0440\u043E\u0441\u0442\u043E\u0432\u0449\u0438\u043A\u043E\u0432."
+  cooldownMin: 0
+  cooldownMax: 0
+  repeat: 0
+  yesTextPrize: "\u041D\u0435 \u0431\u0443\u0434\u0435\u043C \u0443\u043D\u044B\u0432\u0430\u0442\u044C!"
+  yesPrize: gold:-50
+  yesEventChance: []
+  noTextPrize: "\u041D\u0435 \u0431\u0443\u0434\u0435\u043C \u0443\u043D\u044B\u0432\u0430\u0442\u044C!"
+  noPrize: gold:-50
+  noEventChance: []
