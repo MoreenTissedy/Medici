@@ -21,6 +21,9 @@ namespace Medici
                     $"Mod_sin: {Economics.Mod(Stat.Sin)}\nMod_piety: {Economics.Mod(Stat.Piety)}\n";
             mods += $"Mod_trade: {Economics.Mod(Formula.Trade)}\nMod_produce: {Economics.Mod(Formula.Produce)}\n" +
                     $"Mod_credit:{Economics.Mod(Formula.Credit)}\nMod_debit: {Economics.Mod(Formula.Debit)}";
+            mods += $"\nPrice Luxury: {Economics.Price(Goods.Luxury)}\n" +
+                    $"Price Foods: {Economics.Price(Goods.Food)}\n" +
+                    $"Price Weapons: {Economics.Price(Goods.Weapons)}";
             text.text = mods;
         }
     }
