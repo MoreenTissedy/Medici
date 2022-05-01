@@ -15,6 +15,10 @@ namespace Medici
         private void Awake()
         {
             picture = GetComponent<Image>();
+        }
+
+        private void OnEnable()
+        {
             Economics.BasicStatChanged += UpdateValue;
         }
 
@@ -26,5 +30,9 @@ namespace Medici
             picture.DOColor(highlight, highlightTime).SetLoops(2, LoopType.Yoyo);
         }
 
+        private void OnDisable()
+        {
+            Economics.BasicStatChanged -= UpdateValue;
+        }
     }
 }

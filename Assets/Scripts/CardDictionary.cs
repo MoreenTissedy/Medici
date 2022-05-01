@@ -19,6 +19,12 @@ namespace Medici
         {
             //init dictionary
             //CardData[] allCards = FindAllCardData();
+            if (allCards.Length == 0 || allCards[0] is null)
+            {
+                Debug.LogError("No card data available! Please import from csv using Utilities/Import menu");
+                dictionary = new Dictionary<string, CardData>(10);
+                return;
+            }
             dictionary = new Dictionary<string, CardData>(allCards.Length);
             var roots = new List<CardData>(allCards.Length/2);
             foreach (CardData card in allCards)
