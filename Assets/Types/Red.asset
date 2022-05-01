@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbe5f401a61048a8bf45e9fd621c2495, type: 3}
+  m_Name: Red
+  m_EditorClassIdentifier: 
+  eventAvailable: {fileID: 21300000, guid: 8e364f2e8c3a3ce628b3b7854b58e08e, type: 3}
+  eventPending: {fileID: 21300000, guid: 198793c4403d165c3811519c3dfa5d1a, type: 3}
+  eventInPlay: {fileID: 21300000, guid: e7054a9a16b7a0ad98aea2b5db7e597c, type: 3}
+  description: 

@@ -4,6 +4,11 @@ using Random = UnityEngine.Random;
 
 namespace Medici
 {
+    /// <summary>
+    /// This SO holds essential card data.
+    /// They can be created through the import tool from a csv.
+    /// TODO: save editor changes to csv in OnValidate
+    /// </summary>
     [CreateAssetMenu(fileName = "New card", menuName = "Card", order = 0)]
     public class CardData : ScriptableObject
     {
@@ -13,79 +18,69 @@ namespace Medici
             public string id;
             public float rate;
         }
-
-        [Serializable]
-        public class StatValue
-        {
-            public string stat;
-            public int value;
-        }
-
-        public string id;
-
-        //SO link
-        public string type;
-        public string eventName;
-
-        [TextArea(4, 10)] public string textEvent;
         
+        public string id;
+        public CardType type;
+        public string eventName;
+        [TextArea(4, 10)] public string textEvent;
+
         public int cooldownMin, cooldownMax;
         public bool repeat;
 
         [Header("YES option")] public string yesTextPrize;
-
-        //public StatValue[] yesPrize;
-        //public int yesGold, yesRep, yesTown, yesAssassin, yesPiety, yesFlorencePower;
         public string yesPrize;
         public EventRate[] yesEventChance;
 
         [Header("NO option")] public string noTextPrize;
-
-        //public StatValue[] noPrize;
         public string noPrize;
-
-        //public int noGold, noRep, noTown, noAssassin, noPiety, noFlorencePower;
         public EventRate[] noEventChance;
 
-
+        /// <summary>
+        /// Get a random extra card to add to the inwork stack when choosing a card option.
+        /// </summary>
+        /// <param name="yes">True if the option is positive (right), false - if negative (left)</param>
+        /// <returns></returns>
         public string GetExtraID(bool yes)
         {
             float rnd = Random.Range(0, 100);
             float cumulative = 0;
             if (yes)
-            {
                 foreach (var eventRate in yesEventChance)
                 {
                     if (rnd < cumulative + eventRate.rate)
                         return eventRate.id;
                     cumulative += eventRate.rate;
                 }
-            }
             else
-            {
                 foreach (var eventRate in noEventChance)
                 {
                     if (rnd < cumulative + eventRate.rate)
                         return eventRate.id;
                     cumulative += eventRate.rate;
                 }
-            }
+
             Debug.LogWarning($"Event rates are wrong for card {id}, please check.");
-            return String.Empty;
+            return string.Empty;
         }
 
+        /// <summary>
+        /// Is there an extra card to be added to the inwork stack when choosing a card option?
+        /// </summary>
+        /// <param name="yes">True if the option is positive (right), false - if negative (left)</param>
+        /// <returns></returns>
         public bool HasExtraCard(bool yes)
         {
             if (yes)
-            {
                 return yesEventChance.Length > 0;
-            }
-            else
-            {
-                return noEventChance.Length > 0;
-            }
+            return noEventChance.Length > 0;
         }
 
+        /// <summary>
+        /// Parse the given prize string of this card and apply changes to economics.
+        /// TODO: parse to interface hint and do not apply changes.
+        /// </summary>
+        /// <param name="data">the string (yesPrize/noPrize)</param>
+        /// <returns></returns>
         public bool ParseStatValue(string data)
         {
             bool TryParseFormula(string[] pairData, out Goods goods, out int amount)
@@ -97,7 +92,7 @@ namespace Medici
                     return false;
                 }
 
-                if (!Int32.TryParse(pairData[2], out amount))
+                if (!int.TryParse(pairData[2], out amount))
                 {
                     amount = 0;
                     Debug.LogError($"Parse error: card {id}, stat {pairData[0]}, value was not parsed");
@@ -109,13 +104,10 @@ namespace Medici
 
             bool TryApplyFunction(string[] pairData, Func<int, bool> runFunction)
             {
-                if (Int32.TryParse(pairData[1], out int value))
+                if (int.TryParse(pairData[1], out var value))
                 {
                     if (!runFunction(value))
-                    {
                         Debug.LogError($"Parse error: card {id}, stat {pairData[0]}, failed to apply value");
-                    }
-                    
                 }
                 else
                 {
@@ -125,10 +117,10 @@ namespace Medici
 
                 return true;
             }
-            
+
             bool TryApply(string[] pairData, Action<int> setProperty)
             {
-                if (Int32.TryParse(pairData[1], out int value))
+                if (int.TryParse(pairData[1], out var value))
                 {
                     setProperty(value);
                 }
@@ -137,23 +129,21 @@ namespace Medici
                     Debug.LogError($"Parse error: card {id}, stat {pairData[0]}, value was not parsed");
                     return false;
                 }
+
                 return true;
             }
 
-            if (data.Trim() == String.Empty)
-            {
-                return false;
-            }
-            Debug.Log("parsing "+data);
-            string[] pairs = data.Trim().Split(',');
+            if (data.Trim() == string.Empty) return false;
+            Debug.Log("parsing " + data);
+            var pairs = data.Trim().Split(',');
             if (pairs.Length == 0)
                 return false;
             foreach (var pair in pairs)
             {
                 //example gold:100, trade:food:20
-                string[] pairData = pair.Split(':');
+                var pairData = pair.Split(':');
                 pairData[0] = pairData[0].Trim();
-                if (pairData[0] == String.Empty)
+                if (pairData[0] == string.Empty)
                     return false;
                 switch (pairData[0])
                 {
@@ -181,7 +171,7 @@ namespace Medici
                         break;
                     //modifiers
                     case "mod":
-                        if (!Int32.TryParse(pairData[2], out int percent))
+                        if (!int.TryParse(pairData[2], out var percent))
                         {
                             Debug.LogError(
                                 $"Parse error: card {id}, stat {pairData[0]}:{pairData[1]}, value was not parsed");
@@ -210,12 +200,14 @@ namespace Medici
                             Debug.LogError($"Parse error: card {id}, type of goods {pairData[1]} not recognized.");
                             return false;
                         }
-                        if (!Int32.TryParse(pairData[2], out int pricePercent))
+
+                        if (!int.TryParse(pairData[2], out var pricePercent))
                         {
                             Debug.LogError(
                                 $"Parse error: card {id}, price {pairData[1]}, value was not parsed");
                             return false;
                         }
+
                         Economics.ChangePrice(type, pricePercent);
                         break;
                     //formulas
@@ -238,9 +230,9 @@ namespace Medici
                         return false;
                 }
             }
+
             return true;
         }
+
     }
-
-
 }

@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace Medici
 {
+    /// <summary>
+    /// Main game manager
+    /// </summary>
     [RequireComponent(typeof(ICardProvider))]
     public class GameLoop : MonoBehaviour
     {
@@ -13,6 +16,8 @@ namespace Medici
         private int cardsToChooseFrom = 4;
         [SerializeField]
         private int cardsPerDay = 2;
+        [SerializeField] private int initialGold = 300, initialReputation = 0, initialStats = 0;
+        public CardType defaultType;
         [SerializeField]
         private Interface ui;
 
@@ -29,7 +34,7 @@ namespace Medici
             cardProvider = GetComponent<ICardProvider>();
             deck = new Deck(cardProvider.GetRootDeck());
             inwork = new InWork();
-            Economics.Init(300, 0, 0, 0, 0);
+            Economics.Init(initialGold, initialReputation, initialStats, initialStats, initialStats);
             
             //first day
             availableCards = deck.GetRandom(cardsToChooseFrom).ToList();
@@ -108,8 +113,6 @@ namespace Medici
                 Debug.Log($"card added back to deck");
             }
 
-            //Debug.Log($"Gold: {Economics.Gold}, Rep: {Economics.Rep}, " +
-            //          $"Town: {Economics.Town}, Piety: {Economics.Piety}, Assassin: {Economics.Assassin}, FlPower: {Economics.FlorencePower}");
             currentCard = null;
             if (inwork.IsPending())
                 PlayCard(inwork.Next());

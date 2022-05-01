@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using DG.Tweening;
@@ -5,24 +6,23 @@ using UnityEngine.UI;
 
 namespace Medici
 {
-    [RequireComponent(typeof(Image))]
     public class CardButton : MonoBehaviour, ICardPresenter, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField]
-        private float amplitude = 1.2f;
+        protected float amplitude = 1.2f;
         [SerializeField]
-        private float time = 0.2f;
-        [SerializeField] Color disabledColor = Color.gray;
-        [SerializeField] private GameLoop gm;
-        [SerializeField] private Text cardName;
+        protected float time = 0.2f;
+        [SerializeField] protected Color disabledColor = Color.gray;
+        [SerializeField] protected GameLoop gm;
+        [SerializeField] protected Text cardName;
+        [SerializeField] protected Text typeText;
+        [SerializeField] protected Image typeFrame;
         
         private float initialScaleX;
-        private Image picture;
         private CardData currentCard;
         private bool buttonEnabled = true;
         private void Awake()
         {
-            picture = GetComponent<Image>();
             initialScaleX = transform.localScale.x;
         }
 
@@ -34,12 +34,19 @@ namespace Medici
             }
         }
 
-        public void Display(CardData card)
+        public virtual void Display(CardData card)
         {
             cardName.text = card.eventName;
             currentCard = card;
             Enable(true);
-            //type
+            if (card.type is null)
+            {
+                typeText.text = gm?.defaultType?.Description ?? String.Empty;
+            }
+            else
+            {
+                typeText.text = card.type.Description;
+            }
         }
 
         public void Enable(bool on)
@@ -47,11 +54,11 @@ namespace Medici
             buttonEnabled = on;
             if (on)
             {
-                picture.color = Color.white;
+                typeFrame.color = Color.white;
             }
             else
             {
-                picture.color = disabledColor;
+                typeFrame.color = disabledColor;
             }
         }
 
@@ -66,14 +73,14 @@ namespace Medici
         {
             if (!buttonEnabled)
                 return;
-            transform.DOScaleX(initialScaleX*amplitude, time);
+            typeFrame.transform.DOScaleX(initialScaleX*amplitude, time);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             if (!buttonEnabled)
                 return;
-            transform.DOScaleX(initialScaleX, time);
+            typeFrame.transform.DOScaleX(initialScaleX, time);
         }
     }
 }
