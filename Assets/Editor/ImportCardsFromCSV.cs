@@ -9,19 +9,52 @@ using Object = UnityEngine.Object;
 
 namespace Editor
 {
-    public class ImportCardsFromExcel
+    public class ImportCardsFromCSV : EditorWindow
     {
-        private static string CSVpath = "/medici_GameData.csv";
-        private static string assetFolder = "Cards";
+        public static string CSVpath;
+        public static string assetFolder;
+        
+        private static string hint;
+
         [MenuItem("Utilities/Import cards")]
+        public static void OpenWindow()
+        {
+            //open parameters from player prefs
+            CSVpath = PlayerPrefs.GetString("CSVPath");
+            assetFolder = PlayerPrefs.GetString("AssetFolder", "Cards");
+            hint = String.Empty;
+            GetWindow<ImportCardsFromCSV>();
+        }
+
+        private void OnGUI()
+        {
+            var asset = EditorGUILayout.ObjectField("CSV file", 
+                AssetDatabase.LoadAssetAtPath<TextAsset>(CSVpath), 
+                typeof(TextAsset), false);
+            CSVpath = AssetDatabase.GetAssetPath(asset);
+            GUILayout.Label("This file will be updated when the cards change in editor.");
+            assetFolder = EditorGUILayout.TextField("Asset folder name", assetFolder);
+            if (GUILayout.Button("Import", GUILayout.Width(200)))
+            {
+                hint = String.Empty;
+                Import();
+            }
+            GUILayout.Label(hint);
+        }
+
         public static void Import()
         {
+            //save parameters to player prefs - we should use project settings, but this is faster for now
+            PlayerPrefs.SetString("CSVPath", CSVpath);
+            PlayerPrefs.SetString("AssetFolder", assetFolder);
+            
+            hint += "\nImporting...";
             if (!AssetDatabase.GetSubFolders("Assets").Contains($"Assets/{assetFolder}"))
             {
                 AssetDatabase.CreateFolder("Assets", assetFolder);
             }
 
-            string[] alllines = File.ReadAllLines(Application.dataPath + CSVpath);
+            string[] alllines = File.ReadAllLines(CSVpath);
             List<CardData> cards = new List<CardData>(alllines.Length);
 
             for (var index = 1; index < alllines.Length; index++)
@@ -87,6 +120,7 @@ namespace Editor
             
             Object.FindObjectOfType<CardDictionary>()?.ImportDeck(cards.ToArray());
             AssetDatabase.SaveAssets();
+            hint += "Done!";
         }
 
         static bool EventRate(string data, out CardData.EventRate[] events, string cardID)
