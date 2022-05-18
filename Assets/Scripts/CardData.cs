@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using UnityEngine;
 using Random = UnityEngine.Random;
+
 
 namespace Medici
 {
@@ -12,6 +14,7 @@ namespace Medici
     [CreateAssetMenu(fileName = "New card", menuName = "Card", order = 0)]
     public class CardData : ScriptableObject
     {
+        public static readonly int startingIndex = 1;
         [Serializable]
         public class EventRate
         {
@@ -30,10 +33,35 @@ namespace Medici
         [Header("YES option")] public string yesTextPrize;
         public string yesPrize;
         public EventRate[] yesEventChance;
+        public string[] yesEventRemove;
 
         [Header("NO option")] public string noTextPrize;
         public string noPrize;
         public EventRate[] noEventChance;
+        public string[] noEventRemove;
+
+        //save changes to initial csv file 
+        private void OnValidate()
+        {
+            if (!PlayerPrefs.HasKey("CSVPath"))
+            {
+                return;
+            }
+            //TODO check if the file exists
+            string[] cards = File.ReadAllLines(PlayerPrefs.GetString("CSVPath"));
+            foreach (var card in cards)
+            {
+                string[] data = card.Split(';');
+                if (data[startingIndex] == id)
+                {
+                    //save data up to starting index
+                    //export card data
+                    //File.WriteAllLines(PlayerPrefs.GetString("CSVPath"), cards);
+                    Debug.Log("Card data updated (work in progress): "+id);
+                    return;
+                }
+            }
+        }
 
         /// <summary>
         /// Get a random extra card to add to the inwork stack when choosing a card option.
@@ -62,6 +90,19 @@ namespace Medici
             Debug.LogWarning($"Event rates are wrong for card {id}, please check.");
             return string.Empty;
         }
+
+        public string[] GetIDsToRemove(bool yes)
+        {
+            if (yes)
+            {
+                return yesEventRemove;
+            }
+            else
+            {
+                return noEventRemove;
+            }
+        }
+        
 
         /// <summary>
         /// Is there an extra card to be added to the inwork stack when choosing a card option?

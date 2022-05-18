@@ -11,8 +11,6 @@ namespace Medici
         {
             public int cooldown = 0;
             public CardData card;
-
-            /// <summary><para>Initializes a new instance of the <see cref="T:System.Object" /> class.</para></summary>
             public Delay(int cooldown, CardData card)
             {
                 this.cooldown = cooldown;
@@ -51,9 +49,32 @@ namespace Medici
             return pending.Pop();
         }
 
-        public CardData PeepNext()
+        public void Remove(CardData[] cards)
         {
-            return pending.Peek();
+            if (cards is null || cards.Length == 0)
+                return;
+            
+            List<Delay> toRemove = new List<Delay>(delayed.Count);
+            foreach (var card in cards)
+            {
+                Debug.Log("removing from working deck "+card.id+"...");
+                foreach (var delay in delayed)
+                {
+                    if (delay.card == card)
+                    {
+                        toRemove.Add(delay);
+                        break;
+                    }
+                }
+            }
+
+            foreach (var delay in toRemove)
+            {
+                delayed.Remove(delay);
+                Debug.Log("...done");
+            }
+            
+            //remove also in pending?
         }
 
         public void ForwardDay()

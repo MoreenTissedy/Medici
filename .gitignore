@@ -54,3 +54,6 @@ Corridor/Library/metadata/
 # Rider generated #
 # =============== #
 .idea/
+
+#cards test folder
+/Assets/Cards

@@ -11,8 +11,8 @@ namespace Editor
 {
     public class ImportCardsFromCSV : EditorWindow
     {
-        public static string CSVpath;
-        public static string assetFolder;
+        private static string CSVpath;
+        private static string assetFolder;
         
         private static string hint;
 
@@ -63,7 +63,7 @@ namespace Editor
                 string[] data = line.Split(';');
                 bool newSO = true;
                 //starting data index
-                int i = 1;
+                int i = CardData.startingIndex;
                 //if SO exists in folder - take it
                 CardData card = AssetDatabase.LoadAssetAtPath<CardData>($"Assets/{assetFolder}/{data[i]}.asset");
                 if (card is null)
@@ -90,10 +90,17 @@ namespace Editor
                 card.yesPrize = data[i + 7];
                 
                 //8, 9 No_Event_Chanse	Yes_Event_Chanse
-                if (EventRate(data[i + 8], out var ers, card.id))
+                if (ParseEventRate(data[i + 8], out var ers, out var eRemove, card.id))
+                {
                     card.noEventChance = ers;
-                if (EventRate(data[i + 9], out var ers2, card.id))
+                    card.noEventRemove = eRemove;
+                }
+
+                if (ParseEventRate(data[i + 9], out var ers2, out var eRemove2, card.id))
+                {
                     card.yesEventChance = ers2;
+                    card.yesEventRemove = eRemove2;
+                }
                 
                 //10, 11 Coldown	Repeat	
                 string[] cooldownData = data[i + 10].Trim().Split('-');
@@ -123,32 +130,44 @@ namespace Editor
             hint += "Done!";
         }
 
-        static bool EventRate(string data, out CardData.EventRate[] events, string cardID)
+        static bool ParseEventRate(string data, out CardData.EventRate[] events, out string[] eventsRemove, string cardID)
         {
             string[] pairs = data.Trim().Split(',');
             events = new CardData.EventRate[0];
+            eventsRemove = new string[0];
             if (pairs.Length == 0)
             {
                 return false;
             }
             var list = new List<CardData.EventRate>(pairs.Length);
+            var listToRemove = new List<string>(pairs.Length);
             float percent = 100;
             var defaultRate = new List<CardData.EventRate>(pairs.Length);
             foreach (var pair in pairs)
             {
                 string[] pairData = pair.Split(':');
-                var newEventRate = new CardData.EventRate();
                 if (pairData[0].Trim() == String.Empty)
                 {
                     return false;
                 }
+
+                var newEventRate = new CardData.EventRate();
                 newEventRate.id = pairData[0].Trim();
                 if (pairData.Length > 1)
                 {
-                    if (Single.TryParse(pairData[1], out float value) || value<=0 || value>100)
+                    if (Single.TryParse(pairData[1], out float value) && value<=100)
                     {
-                        newEventRate.rate = value;
-                        percent -= value;
+                        if (value < 0)
+                        {
+                            //move this event to the list of events to be removed
+                            listToRemove.Add(newEventRate.id);
+                        }
+                        else
+                        {
+                            newEventRate.rate = value;
+                            percent -= value;
+                            list.Add(newEventRate);
+                        }
                     }
                     else
                     {
@@ -160,14 +179,16 @@ namespace Editor
                 {
                     defaultRate.Add(newEventRate);
                 }
-                list.Add(newEventRate);
+                
             }
             int defaultValue = Mathf.FloorToInt(percent / defaultRate.Count);
             foreach (var eventRate in defaultRate)
             {
                 eventRate.rate = defaultValue;
+                list.Add(eventRate);
             }
             events = list.ToArray();
+            eventsRemove = listToRemove.ToArray();
             return true;
         }
         

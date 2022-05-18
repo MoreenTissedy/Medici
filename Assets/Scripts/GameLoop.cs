@@ -113,6 +113,10 @@ namespace Medici
                 Debug.Log($"card added back to deck");
             }
 
+            inwork.Remove(currentCard.GetIDsToRemove(proceed)
+                .Select(x => cardProvider.GetCard(x))
+                .ToArray());
+
             currentCard = null;
             if (inwork.IsPending())
                 PlayCard(inwork.Next());
