@@ -11,19 +11,42 @@ namespace Editor
 {
     public class ImportCardsFromCSV : EditorWindow
     {
-        private static string CSVpath;
-        private static string assetFolder;
+        private string CSVpath;
+        private string assetFolder;
+        private bool autoUpdate = true;
+        private string hint;
         
-        private static string hint;
+        private static float windowHeight = 300;
+        private static float windowWidth = 500;
+        
 
         [MenuItem("Utilities/Import cards")]
         public static void OpenWindow()
         {
+            GetWindow<ImportCardsFromCSV>(true, "Import cards")
+                .minSize = new Vector2(windowWidth, windowHeight);
+        }
+
+        private void OnEnable()
+        {
             //open parameters from player prefs
-            CSVpath = PlayerPrefs.GetString("CSVPath");
-            assetFolder = PlayerPrefs.GetString("AssetFolder", "Cards");
+            CSVpath = EditorPrefs.GetString("CSVPath");
+            assetFolder = EditorPrefs.GetString("AssetFolder", "Cards");
+            autoUpdate = EditorPrefs.GetBool("AutoUpdate", true);
+            
             hint = String.Empty;
-            GetWindow<ImportCardsFromCSV>();
+        }
+
+        private void OnDisable()
+        {
+            SavePrefs();
+        }
+
+        private void SavePrefs()
+        {
+            EditorPrefs.SetString("CSVPath", CSVpath);
+            EditorPrefs.SetString("AssetFolder", assetFolder);
+            EditorPrefs.SetBool("AutoUpdate", autoUpdate);
         }
 
         private void OnGUI()
@@ -32,7 +55,12 @@ namespace Editor
                 AssetDatabase.LoadAssetAtPath<TextAsset>(CSVpath), 
                 typeof(TextAsset), false);
             CSVpath = AssetDatabase.GetAssetPath(asset);
+            
+            GUILayout.BeginHorizontal();
             GUILayout.Label("This file will be updated when the cards change in editor.");
+            autoUpdate = GUILayout.Toggle(autoUpdate, "Auto Update", GUILayout.Width(100));
+            GUILayout.EndHorizontal();
+            
             assetFolder = EditorGUILayout.TextField("Asset folder name", assetFolder);
             if (GUILayout.Button("Import", GUILayout.Width(200)))
             {
@@ -42,11 +70,9 @@ namespace Editor
             GUILayout.Label(hint);
         }
 
-        public static void Import()
+        public void Import()
         {
-            //save parameters to player prefs - we should use project settings, but this is faster for now
-            PlayerPrefs.SetString("CSVPath", CSVpath);
-            PlayerPrefs.SetString("AssetFolder", assetFolder);
+            SavePrefs();
             
             hint += "\nImporting...";
             if (!AssetDatabase.GetSubFolders("Assets").Contains($"Assets/{assetFolder}"))

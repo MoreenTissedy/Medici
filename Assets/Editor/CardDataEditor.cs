@@ -1,5 +1,6 @@
 using Medici;
 using UnityEditor;
+using UnityEngine;
 
 namespace Editor
 {
@@ -11,7 +12,14 @@ namespace Editor
             //cooldown in one row
             //event rate arrays all visible
             base.OnInspectorGUI();
-            //save cards
+            if (GUILayout.Button("Save", GUILayout.Width(200)))
+            {
+                CardData card = target as CardData;
+                if (!(card is null)) card.SaveData();
+            }
+            bool autoUpdate = EditorPrefs.HasKey("AutoUpdate") && EditorPrefs.GetBool("AutoUpdate");
+            string hint = autoUpdate ? "Auto Update enabled" : "No Auto Update";
+            GUILayout.Label(hint);
         }
     }
 }

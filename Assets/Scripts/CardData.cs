@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -9,7 +10,6 @@ namespace Medici
     /// <summary>
     /// This SO holds essential card data.
     /// They can be created through the import tool from a csv.
-    /// TODO: save editor changes to csv in OnValidate
     /// </summary>
     [CreateAssetMenu(fileName = "New card", menuName = "Card", order = 0)]
     public class CardData : ScriptableObject
@@ -43,24 +43,89 @@ namespace Medici
         //save changes to initial csv file 
         private void OnValidate()
         {
-            if (!PlayerPrefs.HasKey("CSVPath"))
+            if (EditorPrefs.HasKey("AutoUpdate") && !EditorPrefs.GetBool("AutoUpdate"))
+                return;
+            SaveData();
+        }
+
+        /// <summary>
+        /// Overwrite card data in the CSV file
+        /// </summary>
+        public void SaveData()
+        {
+            if (!EditorPrefs.HasKey("CSVPath"))
             {
+                Debug.LogWarning($"Card data can't be saved — specify the file in Utilities/Import Cards");
                 return;
             }
-            //TODO check if the file exists
-            string[] cards = File.ReadAllLines(PlayerPrefs.GetString("CSVPath"));
-            foreach (var card in cards)
+
+            string path = EditorPrefs.GetString("CSVPath");
+            if (!File.Exists(path))
             {
+                Debug.LogWarning($"Card data can't be saved — file not found at {path}");
+                return;
+            }
+
+            string[] cards = File.ReadAllLines(path);
+            for (var index = 0; index < cards.Length; index++)
+            {
+                var card = cards[index];
                 string[] data = card.Split(';');
                 if (data[startingIndex] == id)
                 {
+                    string dataToCSV = String.Empty;
                     //save data up to starting index
+                    for (int i = 0; i < startingIndex; i++)
+                    {
+                        dataToCSV += data[i];
+                        dataToCSV += ";";
+                    }
                     //export card data
-                    //File.WriteAllLines(PlayerPrefs.GetString("CSVPath"), cards);
-                    Debug.Log("Card data updated (work in progress): "+id);
+                    
+                    //0, 1 ID	type
+                    dataToCSV += id+";;";
+                    //2, 3 Event_name	Text_Event
+                    dataToCSV += eventName + ";";
+                    dataToCSV += textEvent + ";";
+                    //4, 5 NO_text_Prize	Yes_Text_prize
+                    dataToCSV += noTextPrize + ";";
+                    dataToCSV += yesTextPrize + ";";
+                
+                    //6, 7 No_Prize	Yes_Prize
+                    dataToCSV += noPrize + ";";
+                    dataToCSV += yesPrize + ";";
+                
+                    //8, 9 No_Event_Chanse	Yes_Event_Chanse
+                    dataToCSV += Export(noEventChance, noEventRemove) +";";
+                    dataToCSV += Export(yesEventChance, yesEventRemove) + ";";
+
+                    //10, 11 Coldown	Repeat	
+                    dataToCSV += $"{cooldownMin}-{cooldownMax};{repeat}";
+                    
+                    //write card data
+                    cards[index] = dataToCSV;
+                    File.WriteAllLines(EditorPrefs.GetString("CSVPath"), cards);
+                    Debug.Log($"Card data updated: {id}, saved to {path}");
                     return;
                 }
+                
             }
+            Debug.LogWarning($"Card data was not saved — {id} not found in {path}");
+        }
+
+        string Export(EventRate[] bonus, string[] removed)
+        {
+            string data = String.Empty;
+            foreach (var eventRate in bonus)
+            {
+                data += $"{eventRate.id}:{eventRate.rate},";
+            }
+            foreach (var s in removed)
+            {
+                data += $"{s}:-1,";
+            }
+
+            return data.TrimEnd(',');
         }
 
         /// <summary>
@@ -91,6 +156,11 @@ namespace Medici
             return string.Empty;
         }
 
+        /// <summary>
+        /// Get all card IDs that should be removed from the stack when choosing a card option.
+        /// </summary>
+        /// <param name="yes">True if the option is positive (right), false - if negative (left)</param>
+        /// <returns></returns>
         public string[] GetIDsToRemove(bool yes)
         {
             if (yes)
