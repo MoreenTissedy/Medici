@@ -90,6 +90,11 @@ namespace Editor
                 bool newSO = true;
                 //starting data index
                 int i = CardData.startingIndex;
+                //if id is empty - ignore string 
+                if (data[i].Trim() == String.Empty)
+                {
+                    continue;
+                }
                 //if SO exists in folder - take it
                 CardData card = AssetDatabase.LoadAssetAtPath<CardData>($"Assets/{assetFolder}/{data[i]}.asset");
                 if (card is null)
